@@ -40,6 +40,7 @@ install -d -m 0755 %{buildroot}/var/clearos/firewall_dynamic
 install -d -m 0755 %{buildroot}/var/clearos/firewall_dynamic/triggers
 install -D -m 0644 packaging/firewall-dynamic.cron %{buildroot}/etc/cron.d/firewall-dynamic
 install -D -m 0644 packaging/ssh.xml %{buildroot}/var/clearos/firewall_dynamic/rules/ssh.xml
+install -D -m 0750 packaging/trigger_ssh.php %{buildroot}/var/clearos/firewall_dynamic/triggers/ssh.php
 
 %post
 logger -p local6.notice -t installer 'app-firewall-dynamic - installing'
@@ -86,3 +87,4 @@ exit 0
 /usr/clearos/apps/firewall_dynamic/libraries
 %config(noreplace) /etc/cron.d/firewall-dynamic
 %attr(0644,webconfig,webconfig) /var/clearos/firewall_dynamic/rules/ssh.xml
+%attr(0750,webconfig,webconfig) /var/clearos/firewall_dynamic/triggers/ssh.php

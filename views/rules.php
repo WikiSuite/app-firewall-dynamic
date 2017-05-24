@@ -42,7 +42,9 @@ $this->lang->load('firewall_dynamic');
 
 $headers = array(
     lang('firewall_dynamic_name'),
-    lang('base_enabled'),
+    lang('firewall_dynamic_trigger'),
+    lang('firewall_dynamic_window'),
+    lang('base_description'),
     lang('base_group')
 );
 
@@ -53,14 +55,23 @@ $headers = array(
 $items = array();
 
 foreach ($rules as $id => $rule) {
-    $item = array(
-        'title' => $username,
-        'action' => '',
-        'anchors' => null,
-        'details' => array(
-            $username,
-            $info['enabled'] ? lang('base_yes') : lang('base_no'),
-            $info['email']
+    $state = ($rule['enabled']) ? 'disable' : 'enable';
+    $state_anchor = 'anchor_' . $state;
+
+    $item['title'] = $rule['description'];
+    $item['current_state'] = (bool)$rule['enabled'];
+
+    $item['details'] = array(
+        $id,
+        $rule['trigger'],
+        $rule['window'] . " " . lang('base_minutes'),
+        $rule['description'],
+        $rule['group'],
+    );
+    $item['anchors'] = button_set(
+        array(
+            $state_anchor("/app/firewall_dynamic/rules/$state/$id"),
+            anchor_edit('/app/firewall_dynamic/rules/edit/' . $id)
         )
     );
 
@@ -70,6 +81,11 @@ foreach ($rules as $id => $rule) {
 ///////////////////////////////////////////////////////////////////////////////
 // Summary table
 ///////////////////////////////////////////////////////////////////////////////
+
+$options = array (
+    'responsive' => array(2 => 'none', 3 => 'none'),
+    'row-enable-disable' => TRUE
+);
 
 echo summary_table(
     lang('firewall_dynamic_rules'),

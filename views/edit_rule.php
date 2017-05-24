@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Firewall Dynamic for Webconfig triggers view.
+ * Firewall Dynamic for Webconfig rules view.
  *
  * @category   apps
  * @package    firewall-dynamic
@@ -37,44 +37,24 @@ $this->lang->load('base');
 $this->lang->load('firewall_dynamic');
 
 ///////////////////////////////////////////////////////////////////////////////
-// Headers
+// Form handler
 ///////////////////////////////////////////////////////////////////////////////
 
-$headers = array(
-    lang('firewall_dynamic_name'),
-    lang('base_enabled'),
-    lang('base_group')
+$buttons = array(
+    form_submit_update('submit'),
+    anchor_cancel('/app/firewall_dynamic')
 );
 
 ///////////////////////////////////////////////////////////////////////////////
-// Items
+// Form
 ///////////////////////////////////////////////////////////////////////////////
 
-$items = array();
+echo form_open('firewall_dynamic/rules/edit/' . $rule);
+echo form_header($rule);
 
-foreach ($triggers as $id => $trigger) {
-    $item = array(
-        'title' => $username,
-        'action' => '',
-        'anchors' => null,
-        'details' => array(
-            $username,
-            $info['enabled'] ? lang('base_yes') : lang('base_no'),
-            $info['email']
-        )
-    );
+echo field_input('window', $metadata['window'], lang('firewall_dynamic_window') . ' (' . strtolower(lang('base_minutes')) . ')');
+echo field_dropdown('group', $metadata['group'], $group_options, lang('base_group'));
+echo field_button_set($buttons);
 
-    $items[] = $item;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Summary table
-///////////////////////////////////////////////////////////////////////////////
-
-echo summary_table(
-    lang('firewall_dynamic_triggers'),
-    NULL,
-    $headers,
-    $items,
-    $options
-);
+echo form_footer();
+echo form_close();

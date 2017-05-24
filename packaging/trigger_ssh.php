@@ -2,10 +2,10 @@
 <?php
 
 /**
- * Firewall Dynamic for Webconfig.
+ * SSH Trigger for Firewall Dynamic.
  *
  * @category   apps
- * @package    two-factor-auth
+ * @package    firewall-dynamic
  * @subpackage scripts
  * @author     eGloo <team@egloo.ca>
  * @copyright  2017 Avantech
@@ -45,8 +45,10 @@ require_once $bootstrap . '/bootstrap.php';
 //--------
 
 use \clearos\apps\firewall_dynamic\Firewall_Dynamic as Firewall_Dynamic;
+use \clearos\apps\ssh_server\OpenSSH as OpenSSH;
 
 clearos_load_library('firewall_dynamic/Firewall_Dynamic');
+clearos_load_library('ssh_server/OpenSSH');
 
 // Exceptions
 //-----------
@@ -64,11 +66,13 @@ use \Exception as Exception;
 $short_options  = '';
 
 // Common
+$short_options .= 's';   // Source IP
 $short_options .= 'h';   // Help
 
 $helpopts  = '
   Common Options
   --------------
+  -s: source IP
   -h: help
 ';
 
@@ -80,6 +84,7 @@ $options = getopt($short_options);
 $firewall_dynamic = new Firewall_Dynamic();
 
 $help = isset($options['h']) ? TRUE : FALSE;
+$source_ip = isset($options['s']) ? $options['s'] : FALSE;
 
 if ($help) {
     echo "usage: " . $argv[0] . " [options]\n";
@@ -87,11 +92,20 @@ if ($help) {
     exit(0);
 }
 
+$substitutions = array();
+
 try {
-    $firewall_dynamic->create_rule('ssh');
+    $ssh = new OpenSSH();
+    $substitutions['dport'] = $ssh->get_port(); 
+    date_default_timezone_set("UTC");
+    $datestop = date("Y-m-d\TG:i:s", strtotime("+" . $firewall_dynamic->get_window('ssh') . " minutes"));
+    $substitutions['datestop'] = $datestop;
+    $firewall_dynamic->create_rule('ssh', $substitutions);
+    exit(0);
     echo "Complete.\n";
 } catch (Exception $e) {
     echo clearos_exception_message($e);
+    exit(1);
 }
 
 // vim: syntax=php

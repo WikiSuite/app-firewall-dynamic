@@ -62,7 +62,111 @@ class Rules extends ClearOS_Controller
         $this->lang->load('firewall_dynamic');
         $this->load->library('firewall_dynamic/Firewall_Dynamic');
 
-        $data = NULL;
+        $data['rules'] = $this->firewall_dynamic->get_rules();
         $this->page->view_form('rules', $data, lang('firewall_dynamic_rules'));
+    }
+
+    /**
+     * Enables rule.
+     *
+     * @param string  $rule rule
+     *
+     * @return view
+     */
+
+    function enable($rule)
+    {
+        $this->load->library('firewall_dynamic/Firewall_Dynamic');
+        $this->lang->load('firewall_dynamic');
+        try {
+            $this->firewall_dynamic->set_rule_state(TRUE, $rule);
+
+            $this->page->set_status_enabled();
+            redirect('/firewall_dynamic');
+        } catch (Exception $e) {
+            $this->page->view_exception($e);
+            return;
+        }
+    }
+    /**
+     * Disables rule.
+     *
+     * @param string  $rule rule
+     *
+     * @return view
+     */
+
+    function disable($rule)
+    {
+        $this->load->library('firewall_dynamic/Firewall_Dynamic');
+        $this->lang->load('firewall_dynamic');
+        try {
+            $this->firewall_dynamic->set_rule_state(FALSE, $rule);
+
+            $this->page->set_status_disabled();
+            redirect('/firewall_dynamic');
+        } catch (Exception $e) {
+            $this->page->view_exception($e);
+            return;
+        }
+    }
+
+    /**
+     * Rule edit controller
+     *
+     * @param string $rule rule name
+     *
+     * @return view
+     */
+
+    function edit($rule)
+    {
+        // Load dependencies
+        //------------------
+
+        $this->load->library('firewall_dynamic/Firewall_Dynamic');
+        $this->lang->load('firewall_dynamic');
+
+        try {
+            $metadata = $this->firewall_dynamic->get_rule($rule);
+        } catch (Exception $e) {
+            $this->page->view_exception($e);
+            return;
+        }
+
+        // Set validation rules
+        //---------------------
+         
+        $this->form_validation->set_policy('window', 'firewall_dynamic/Firewall_Dynamic', 'validate_window', TRUE);
+        $this->form_validation->set_policy('group', 'firewall_dynamic/Firewall_Dynamic', 'validate_group', TRUE);
+
+        $form_ok = $this->form_validation->run();
+
+        // Handle form submit
+        //-------------------
+
+        if ($this->input->post('submit') && $form_ok) {
+            try {
+                $this->firewall->set_window($rule, $this->input->post('window'));
+
+                $this->page->set_status_updated();
+
+                redirect('/firewall_dynamic');
+            } catch (Exception $e) {
+                $this->page->view_exception($e);
+                return;
+            }
+        }
+
+        // Load view data
+        //---------------
+
+        $data['rule'] = $rule;
+        $data['metadata'] = $metadata;
+
+        // Load views
+        //-----------
+
+        $this->page->view_form('firewall_dynamic/edit_rule', $data, lang('base_edit'));
     }
 }

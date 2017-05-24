@@ -64,7 +64,7 @@ class Firewall_Dynamic extends ClearOS_Controller
         // Load views
         //-----------
 
-        $views = array('firewall_dynamic/triggers', 'firewall_dynamic/rules');
+        $views = array('firewall_dynamic/rules');
 
         $this->page->view_forms($views, lang('firewall_dynamic_app_name'));
     }

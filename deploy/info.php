@@ -38,6 +38,12 @@ $app['core_file_manifest'] = array(
         'config' => TRUE,
         'config_params' => 'noreplace',
     ),
+    'trigger_ssh.php' => array(
+        'target' => '/var/clearos/firewall_dynamic/triggers/ssh.php',
+        'mode' => '0750',
+        'owner' => 'webconfig',
+        'group' => 'webconfig',
+    ),
     'ssh.xml' => array(
         'target' => '/var/clearos/firewall_dynamic/rules/ssh.xml',
         'mode' => '0644',
