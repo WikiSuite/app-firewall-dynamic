@@ -1,0 +1,1 @@
+0 2 * * * root /usr/clearos/apps/firewall_dynamic/deploy/cleanup > /dev/null 2>&1

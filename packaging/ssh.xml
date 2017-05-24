@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table name="filter">
+  <chain name="INPUT">
+    <rule>
+      <position>INSERT</position>
+      <conditions>
+        <match>
+          <p>tcp</p>
+        </match>
+        <match explicit="mac">
+          <mac-source>00:1B:21:02:99:BF</mac-source>
+        </match>
+        <match explicit="tcp">
+          <dport>32400</dport>
+        </match>
+        <match explicit="state">
+          <state>NEW,ESTABLISHED</state>
+        </match>
+        <match explicit="time">
+          <weekdays>Fri</weekdays>
+          <datestop>2038-01-19T03:14:07</datestop>
+        </match>
+      </conditions>
+      <jump>ACCEPT</jump>
+    </rule>
+  </chain>
+</table>
