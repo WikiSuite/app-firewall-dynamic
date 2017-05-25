@@ -29,7 +29,7 @@ $app['subcategory'] = lang('base_subcategory_firewall');
 /////////////////////////////////////////////////////////////////////////////
 
 $app['core_requires'] = array(
-    'firewall-dynamic-extension-core',
+//    'firewall-dynamic-extension-core',
 );
 
 $app['core_file_manifest'] = array( 

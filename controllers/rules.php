@@ -150,6 +150,7 @@ class Rules extends ClearOS_Controller
         if ($this->input->post('submit') && $form_ok) {
             try {
                 $this->firewall_dynamic->set_window($rule, $this->input->post('window'));
+                $this->firewall_dynamic->set_root($rule, $this->input->post('root'));
                 $this->firewall_dynamic->set_group($rule, $this->input->post('group'));
 
                 $this->page->set_status_updated();

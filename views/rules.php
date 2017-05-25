@@ -45,6 +45,7 @@ $headers = array(
     lang('firewall_dynamic_trigger'),
     lang('firewall_dynamic_window'),
     lang('base_description'),
+    lang('firewall_dynamic_root_account'),
     lang('base_group')
 );
 
@@ -62,10 +63,11 @@ foreach ($rules as $id => $rule) {
     $item['current_state'] = (bool)$rule['enabled'];
 
     $item['details'] = array(
-        $id,
+        $rule['name'],
         $rule['trigger'],
         $rule['window'] . " " . lang('base_minutes'),
         $rule['description'],
+        ($rule['root'] ? lang('base_yes') : lang('base_no')),
         $rule['group'],
     );
     $item['anchors'] = button_set(
@@ -83,7 +85,7 @@ foreach ($rules as $id => $rule) {
 ///////////////////////////////////////////////////////////////////////////////
 
 $options = array (
-    'responsive' => array(2 => 'none', 3 => 'none'),
+    'responsive' => array(1 => 'none', 2 => 'none', 3 => 'none'),
     'row-enable-disable' => TRUE
 );
 

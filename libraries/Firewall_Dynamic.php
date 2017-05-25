@@ -157,7 +157,9 @@ class Firewall_Dynamic extends Engine
             if (!empty($basename))
                 clearos_load_language($basename);
             $rules[$name] = array(
+                'name' => empty($basename) ? (String)$xml->name : lang((String)$xml->name),
                 'description' => empty($basename) ? (String)$xml->description : lang((String)$xml->description),
+                'root' => (int)$xml->root,
                 'enabled' => (int)$xml->enabled,
                 'trigger' => empty($basename) ? (String)$xml->trigger : lang((String)$xml->trigger),
                 'window' => (int)$xml->window,
@@ -190,6 +192,35 @@ class Firewall_Dynamic extends Engine
         if ($xml === FALSE)
             throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
         $xml->window = $window;
+        $xml->asXML(self::FOLDER_RULES . $rule . '.xml');
+    }
+
+    /**
+     * Set root - whether rule should apply to root account.
+     *
+     * @param String  rule
+     * @param Boolean enabled
+     *
+     * @return void
+     * @throws Engine_Exception
+     */
+
+    public function set_root($rule, $enabled)
+    {
+        if ($enabled === 'on' || $enabled == 1 || $enabled == TRUE)
+            $enabled = 1;
+        else
+            $enabled = 0;
+
+        $file = new File(self::FOLDER_RULES . $rule . '.xml');
+        if (!$file->exists())
+            throw new Engine_Exception(lang('firewall_dynamic_rule_not_found'), CLEAROS_ERROR);
+        $xml_source = $file->get_contents();
+
+        $xml = simplexml_load_string($xml_source);
+        if ($xml === FALSE)
+            throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
+        $xml->root = $enabled;
         $xml->asXML(self::FOLDER_RULES . $rule . '.xml');
     }
 

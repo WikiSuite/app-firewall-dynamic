@@ -21,7 +21,6 @@ Summary: Dynamic Firewall - Core
 License: LGPLv3
 Group: ClearOS/Libraries
 Requires: app-base-core
-Requires: firewall-dynamic-extension-core
 
 %description core
 The dynamic firewall app allows administrator to generate and implement time-based firewall rules based on webconfig events.

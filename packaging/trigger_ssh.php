@@ -129,7 +129,9 @@ try {
     // If not part of ssh group, don't do anything.
     $group = Group_Factory::create($rule['group']);
     $group_info = $group->get_info();
-    if (!in_array($username, $group_info['core']['members']))
+    if ($username != 'root' && !in_array($username, $group_info['core']['members']))
+        exit(0);
+    if ($username == 'root' && !$rule['root'])
         exit(0);
 
     if (! Network_Utils::is_valid_ip($source_ip)) {

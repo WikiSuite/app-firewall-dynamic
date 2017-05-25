@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <config name="ssh" basename="firewall_dynamic">
+<config name="ssh" basename="firewall_dynamic">
+  <name>firewall_dynamic_ssh_name</name>
   <description>firewall_dynamic_ssh_description</description>
   <trigger>firewall_dynamic_ssh_trigger</trigger>
   <window>30</window>
   <enabled>1</enabled>
+  <root>0</root>
   <group>allusers</group>
   <table name="filter">
     <chain name="INPUT">
