@@ -125,12 +125,18 @@ try {
     date_default_timezone_set("UTC");
     $rule = $firewall_dynamic->get_rule('ssh');
 
+    // Rule active?
+    if (!$rule['enabled'])
+        exit(0);
+
     // Check group membership
     // If not part of ssh group, don't do anything.
     $group = Group_Factory::create($rule['group']);
     $group_info = $group->get_info();
+
     if ($username != 'root' && !in_array($username, $group_info['core']['members']))
         exit(0);
+
     if ($username == 'root' && !$rule['root'])
         exit(0);
 
@@ -139,7 +145,7 @@ try {
         exit(1);
     }
 
-    $datestop = date("Y-m-d\TG:i:s", strtotime("+" . $rule['window'] . " minutes"));
+    $datestop = date("Y-m-d\TG:i:s", strtotime("+" . $rule['window'] . " seconds"));
     $substitutions['datestop'] = $datestop;
     $firewall_dynamic->create_rule('ssh', $substitutions);
     exit(0);

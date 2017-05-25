@@ -1,0 +1,15 @@
+#######################################
+# Created by API - Please Do NOT Edit #
+#######################################
+
+# IPv4 Firewall Dynamic Rules
+#============================
+
+if [ "$FW_PROTO" == "ipv4" ]; then true
+fi
+
+# IPv6 Firewall Dynamic Rules
+#============================
+
+if [ "$FW_PROTO" == "ipv6" ]; then true
+fi

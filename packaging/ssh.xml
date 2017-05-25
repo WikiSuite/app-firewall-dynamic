@@ -3,10 +3,11 @@
   <name>firewall_dynamic_ssh_name</name>
   <description>firewall_dynamic_ssh_description</description>
   <trigger>firewall_dynamic_ssh_trigger</trigger>
-  <window>30</window>
-  <enabled>1</enabled>
+  <window>300</window>
+  <enabled>0</enabled>
   <root>0</root>
   <group>allusers</group>
+  <version>ipv4</version>
   <table name="filter">
     <chain name="INPUT">
       <rule>

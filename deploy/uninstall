@@ -1,0 +1,6 @@
+#!/bin/sh
+
+if [ -e /etc/clearos/firewall.d/firewall_dynamic ]; then
+    logger -p local6.notice -t installer "app-firewall-dynamic-core - disabling dynamic firewall entries on un-install"
+    rm -f /etc/clearos/firewall.d/firewall_dynamic
+fi

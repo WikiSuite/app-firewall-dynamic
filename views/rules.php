@@ -65,7 +65,7 @@ foreach ($rules as $id => $rule) {
     $item['details'] = array(
         $rule['name'],
         $rule['trigger'],
-        $rule['window'] . " " . lang('base_minutes'),
+        (array_key_exists($rule['window'], $window_options) ? $window_options[$rule['window']] : $rule['window'] . " " . strtolower(lang('base_seconds'))),
         $rule['description'],
         ($rule['root'] ? lang('base_yes') : lang('base_no')),
         $rule['group'],

@@ -56,11 +56,13 @@ use \clearos\apps\base\File as File;
 use \clearos\apps\base\Folder as Folder;
 use \clearos\apps\base\Engine as Engine;
 use \clearos\apps\groups\Group_Factory as Group_Factory;
+use \clearos\apps\base\Shell as Shell;
 
 clearos_load_library('base/File');
 clearos_load_library('base/Folder');
 clearos_load_library('base/Engine');
 clearos_load_library('groups/Group_Factory');
+clearos_load_library('base/Shell');
 
 // Exceptions
 //-----------
@@ -94,17 +96,21 @@ class Firewall_Dynamic extends Engine
     // C O N S T A N T S
     ///////////////////////////////////////////////////////////////////////////////
 
+    const LOG_TAG = 'firewall-dynamic';
     const FOLDER_RULES = '/var/clearos/firewall_dynamic/rules/';
-    const FILE_CONFIG = '/etc/clearos/firewall_dynamic.conf';
+    const FILE_CONFIG = '/etc/clearos/firewall.d/10-firewall-dynamic';
     const DEFAULT_WINDOW = 30; // Default Window of 30 minutes until timeout
+    const CMD_IPTABLES = '/sbin/iptables';
 
     ///////////////////////////////////////////////////////////////////////////////
     // V A R I A B L E S
     ///////////////////////////////////////////////////////////////////////////////
 
+    protected $configuration = array();
+    protected $ipv4_index = -1;
+    protected $ipv6_index = -1;
     protected $is_loaded = FALSE;
-    protected $config = array();
-
+    protected $commands = array();
 
     /**
      * Firewall_Dynamic constructor.
@@ -301,33 +307,214 @@ class Firewall_Dynamic extends Engine
         $chain = $xml->table->chain->attributes()->name;
         $rule = $xml->table->chain->rule;
 
-        $cmd = "\$IPTABLES -t " . $table . " ";
+        $args = "-t " . $table . " ";
         if ($xml->position == 'INSERT')
-            $cmd .= "-I $chain ";
+            $args .= "-I $chain ";
         else
-            $cmd .= "-A $chain ";
+            $args .= "-A $chain ";
         foreach ($rule->conditions->match as $match) {
             if ($match->attributes()->explicit == null) {
                 foreach($match->children() as $key => $value) {
+                    $key = (String)$key;
+                    $value = (String)$value;
                     if (empty($value) && !array_key_exists($key, $substitutions))
                         continue;
-                    $cmd .= "-$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
+                    $args .= "-$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
                 }
                 continue;
                 
             }
             $params = "";
             foreach($match->children() as $key => $value) {
+                $key = (String)$key;
+                $value = (String)$value;
                 if (empty($value) && !array_key_exists($key, $substitutions))
                     continue;
                 $params .= "--$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
             }
             if (!empty($params))
-                $cmd .= "-m " . $match->attributes()->explicit . " " . $params;
+                $args .= "-m " . (String)$match->attributes()->explicit . " " . $params;
         }
         if ($xml->table->chain->rule->jump != null)
-            $cmd .= "-j " . $xml->table->chain->rule->jump;
-        echo "$cmd\n";
+            $args .= "-j " . (String)$xml->table->chain->rule->jump;
+
+        try {
+            $shell = new Shell();
+            $shell->execute(self::CMD_IPTABLES, " -w " . $args, TRUE);
+        } catch (Exception $e) {
+            clearos_log(self::LOG_TAG, "Unable to add rule: " . clearos_exception_message($e) . " - " . $args);
+            return;
+        }
+
+        $this->_add_rule($xml->version, self::CMD_IPTABLES . " -w " .  $args);
+    }
+
+    /**
+     * Get window options.
+     *
+     * @return array of times
+     * @throws Engine_Exception
+     */
+
+    public function get_window_options()
+    {
+        clearos_profile(__METHOD__, __LINE__);
+        $options = array(
+            60 => "1 " . strtolower(lang('base_minute')),
+            180 => "3 " . strtolower(lang('base_minutes')),
+            300 => "5 " . strtolower(lang('base_minutes')),
+            600 => "10 " . strtolower(lang('base_minutes')),
+            1800 => "30 " . strtolower(lang('base_minutes')),
+            3600 => "1 " . strtolower(lang('base_hour')),
+            7200 => "2 " . strtolower(lang('base_hours')),
+            14400 => "4 " . strtolower(lang('base_hours')),
+            28800 => "8 " . strtolower(lang('base_hours')),
+        );
+        return $options;
+    }
+
+    /**
+     * Purge firewall rules.
+     *
+     * @throws Engine_Exception
+     */
+
+    public function purge_rules()
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (! $this->is_loaded)
+            $this->_load_configuration();
+
+        date_default_timezone_set("UTC");
+        $now = date("Y-m-d\TG:i:s");
+        foreach ($this->configuration as $index => $line) {
+            if (key($line) != 'ipv4' && key($line) != 'ipv6')
+                continue;
+            if (preg_match("/.*datestop (\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d).*/", current($line), $match)) {
+                if (strtotime($now) > strtotime($match[1]))
+                    unset($this->configuration[$index]);
+            }
+        }
+        $this->_save_configuration();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // P R I V A T E  M E T H O D S
+    ///////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Load configuration file
+     *
+     * @return void;
+     */
+
+    function _load_configuration()
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        $this->configuration = array();
+
+        try {
+            $file = new File(self::FILE_CONFIG);
+            $lines = $file->get_contents_as_array();
+            $type = 'unknown';
+            $index = 0;
+            foreach ($lines as $line) {
+                if (preg_match("/.*FW_PROTO.*ipv4.*/", $line)) {
+                    $this->ipv4_index = $index;
+                    $this->configuration[] = array('bash' => $line);
+                    $type = 'ipv4';
+                    $index++;
+                    continue;
+                } else if (preg_match("/.*FW_PROTO.*ipv6.*/", $line)) {
+                    $this->ipv6_index = $index;
+                    $this->configuration[] = array('bash' => $line);
+                    $index++;
+                    $type = 'ipv6';
+                    continue;
+                } else if (preg_match("/^fi$/", $line)) {
+                    $this->configuration[] = array('bash' => $line);
+                    $type = 'unknown';
+                    $index++;
+                    continue;
+                }
+                $this->configuration[] = array($type => $line);
+                $index++;
+            }
+        } catch (File_Not_Found_Exception $e) {
+            // Not fatal
+        }
+
+        $this->is_loaded = TRUE;
+    }
+
+    /**
+     * Add new rule
+     *
+     * @param String  $type        ipv4 or ipv6
+     * @param String  $entry       line entry
+     *
+     * @return void
+     * @throws Engine_Exception
+     */
+
+    function _add_rule($type, $entry)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (! $this->is_loaded)
+            $this->_load_configuration();
+
+        array_splice(
+            $this->configuration,
+            (1 + ($type == 'ipv4' ? $this->ipv4_index : $this->ipv6_index)),
+            0,
+            $entry
+        );
+
+        $this->_save_configuration();
+    }
+
+    /**
+     * Save configuration file
+     *
+     * @return void;
+     */
+
+    function _save_configuration()
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        // Delete any old temp file lying around
+        //--------------------------------------
+
+        $file = new File(self::FILE_CONFIG);
+
+        if ($file->exists())
+            $file->delete();
+
+        // Create temp file
+        //-----------------
+
+        $file->create('root', 'root', '0755');
+
+        // Write out the file
+        //-------------------
+
+        $contents = array();
+        foreach ($this->configuration as $line) {
+            if (is_array($line)) {
+                if (key($line) == 'bash' || key($line) == 'unknown')
+                    $contents[] = current($line);
+                else
+                    $contents[] = "\t" . trim(current($line));
+            } else {
+                $contents[] = "\t" . trim($line);
+            }
+        }
+        $file->dump_contents_from_array($contents);
+        $this->is_loaded = FALSE;
     }
 
     ///////////////////////////////////////////////////////////////////////////////

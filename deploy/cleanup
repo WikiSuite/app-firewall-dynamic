@@ -2,7 +2,7 @@
 <?php
 
 /**
- * Firewall Dynamic for Webconfig.
+ * CleanUp script for Firewall Dynamic.
  *
  * @category   apps
  * @package    two-factor-auth
@@ -88,8 +88,7 @@ if ($help) {
 }
 
 try {
-    $firewall_dynamic->create_rule('ssh');
-    echo "Complete.\n";
+    $firewall_dynamic->purge_rules();
 } catch (Exception $e) {
     echo clearos_exception_message($e);
 }

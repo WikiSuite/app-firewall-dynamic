@@ -50,6 +50,12 @@ $app['core_file_manifest'] = array(
         'owner' => 'webconfig',
         'group' => 'webconfig',
     ),
+    '10-firewall-dynamic' => array(
+        'target' => '/etc/clearos/firewall.d/10-firewall-dynamic',
+        'mode' => '0755',
+        'config' => TRUE,
+        'config_params' => 'noreplace'
+    )
 );
 $app['core_directory_manifest'] = array(
     '/var/clearos/firewall_dynamic' => array(

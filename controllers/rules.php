@@ -63,6 +63,7 @@ class Rules extends ClearOS_Controller
         $this->load->library('firewall_dynamic/Firewall_Dynamic');
 
         $data['rules'] = $this->firewall_dynamic->get_rules();
+        $data['window_options'] = $this->firewall_dynamic->get_window_options();
         $this->page->view_form('rules', $data, lang('firewall_dynamic_rules'));
     }
 
@@ -167,6 +168,9 @@ class Rules extends ClearOS_Controller
 
         $data['rule'] = $rule;
         $data['metadata'] = $metadata;
+
+        // Window
+        $data['window_options'] = $this->firewall_dynamic->get_window_options();
 
         // Groups
         $groups = $this->group_manager->get_details();
