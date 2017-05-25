@@ -45,15 +45,25 @@ require_once $bootstrap . '/bootstrap.php';
 //--------
 
 use \clearos\apps\firewall_dynamic\Firewall_Dynamic as Firewall_Dynamic;
+use \clearos\apps\groups\Group_Factory as Group_Factory;
+use \clearos\apps\network\Network_Utils as Network_Utils;
 use \clearos\apps\ssh_server\OpenSSH as OpenSSH;
 
 clearos_load_library('firewall_dynamic/Firewall_Dynamic');
+clearos_load_library('groups/Group_Factory');
+clearos_load_library('network/Network_Utils');
 clearos_load_library('ssh_server/OpenSSH');
 
 // Exceptions
 //-----------
 
 use \Exception as Exception;
+
+///////////////////////////////////////////////////////////////////////////////
+// T R A N S L A T I O N S
+///////////////////////////////////////////////////////////////////////////////
+
+clearos_load_language('network');
 
 ///////////////////////////////////////////////////////////////////////////////
 // M A I N
@@ -66,12 +76,14 @@ use \Exception as Exception;
 $short_options  = '';
 
 // Common
-$short_options .= 's';   // Source IP
+$short_options .= 'u:';   // Username
+$short_options .= 's:';   // Source IP
 $short_options .= 'h';   // Help
 
 $helpopts  = '
   Common Options
   --------------
+  -u: username
   -s: source IP
   -h: help
 ';
@@ -83,8 +95,9 @@ $options = getopt($short_options);
 
 $firewall_dynamic = new Firewall_Dynamic();
 
-$help = isset($options['h']) ? TRUE : FALSE;
+$username = isset($options['u']) ? $options['u'] : FALSE;
 $source_ip = isset($options['s']) ? $options['s'] : FALSE;
+$help = isset($options['h']) ? TRUE : FALSE;
 
 if ($help) {
     echo "usage: " . $argv[0] . " [options]\n";
@@ -92,17 +105,42 @@ if ($help) {
     exit(0);
 }
 
+if (!$username) {
+    echo "Username required (-u <username>)\n";
+    exit(1);
+}
+
+if (!$source_ip) {
+    echo "Source IP (-s <ip address>)\n";
+    exit(1);
+}
+
 $substitutions = array();
 
 try {
+
     $ssh = new OpenSSH();
+    $substitutions['s'] = $source_ip;
     $substitutions['dport'] = $ssh->get_port(); 
     date_default_timezone_set("UTC");
-    $datestop = date("Y-m-d\TG:i:s", strtotime("+" . $firewall_dynamic->get_window('ssh') . " minutes"));
+    $rule = $firewall_dynamic->get_rule('ssh');
+
+    // Check group membership
+    // If not part of ssh group, don't do anything.
+    $group = Group_Factory::create($rule['group']);
+    $group_info = $group->get_info();
+    if (!in_array($username, $group_info['core']['members']))
+        exit(0);
+
+    if (! Network_Utils::is_valid_ip($source_ip)) {
+        echo lang('network_ip_invalid') . "\n";
+        exit(1);
+    }
+
+    $datestop = date("Y-m-d\TG:i:s", strtotime("+" . $rule['window'] . " minutes"));
     $substitutions['datestop'] = $datestop;
     $firewall_dynamic->create_rule('ssh', $substitutions);
     exit(0);
-    echo "Complete.\n";
 } catch (Exception $e) {
     echo clearos_exception_message($e);
     exit(1);

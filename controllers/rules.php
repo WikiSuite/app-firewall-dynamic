@@ -126,6 +126,8 @@ class Rules extends ClearOS_Controller
 
         $this->load->library('firewall_dynamic/Firewall_Dynamic');
         $this->lang->load('firewall_dynamic');
+        $this->load->library('groups/Group_Engine');
+        $this->load->factory('groups/Group_Manager_Factory');
 
         try {
             $metadata = $this->firewall_dynamic->get_rule($rule);
@@ -147,7 +149,8 @@ class Rules extends ClearOS_Controller
 
         if ($this->input->post('submit') && $form_ok) {
             try {
-                $this->firewall->set_window($rule, $this->input->post('window'));
+                $this->firewall_dynamic->set_window($rule, $this->input->post('window'));
+                $this->firewall_dynamic->set_group($rule, $this->input->post('group'));
 
                 $this->page->set_status_updated();
 
@@ -163,6 +166,17 @@ class Rules extends ClearOS_Controller
 
         $data['rule'] = $rule;
         $data['metadata'] = $metadata;
+
+        // Groups
+        $groups = $this->group_manager->get_details();
+        $group_options[-1] = lang('base_select');
+
+        foreach ($groups as $name => $group) {
+            $description = (empty($group['description'])) ? '' : ' - ' . $group['description'];
+            $group_options[$name] = $name . $description;
+        }
+
+        $data['group_options'] = $group_options;
 
         // Load views
         //-----------

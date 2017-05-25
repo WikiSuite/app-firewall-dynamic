@@ -53,7 +53,7 @@ echo form_open('firewall_dynamic/rules/edit/' . $rule);
 echo form_header($rule);
 
 echo field_input('window', $metadata['window'], lang('firewall_dynamic_window') . ' (' . strtolower(lang('base_minutes')) . ')');
-echo field_dropdown('group', $metadata['group'], $group_options, lang('base_group'));
+echo field_dropdown('group', $group_options, $metadata['group'], lang('base_group'));
 echo field_button_set($buttons);
 
 echo form_footer();

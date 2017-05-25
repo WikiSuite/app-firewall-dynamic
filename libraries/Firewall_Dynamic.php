@@ -53,18 +53,14 @@ clearos_load_language('firewall_dynamic');
 ///////////////////////////////////////////////////////////////////////////////
 
 use \clearos\apps\base\File as File;
-use \clearos\apps\base\Configuration_File as Configuration_File;
 use \clearos\apps\base\Folder as Folder;
 use \clearos\apps\base\Engine as Engine;
-use \clearos\apps\users\User_Factory as User_Factory;
-use \clearos\apps\users\User_Manager_Factory;
+use \clearos\apps\groups\Group_Factory as Group_Factory;
 
 clearos_load_library('base/File');
-clearos_load_library('base/Coniguration_File');
 clearos_load_library('base/Folder');
 clearos_load_library('base/Engine');
-clearos_load_library('users/User_Factory');
-clearos_load_library('users/User_Manager_Factory');
+clearos_load_library('groups/Group_Factory');
 
 // Exceptions
 //-----------
@@ -120,25 +116,6 @@ class Firewall_Dynamic extends Engine
     }
 
     /**
-     * Get mode.
-     *
-     * @return string block mode (allow_all or block_all)
-     * @throws Engine_Exception
-     */
-
-    function get_window($rule)
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        if (! $this->is_loaded)
-            $this->_load_config();
-
-        if (!isset($this->config[$rule . "_window"]))
-            return self::DEFAULT_WINDOW;
-        return $this->config[$rule . "_window"];
-    }
-
-    /**
      * Get rule.
      *
      * @param String rule
@@ -188,6 +165,58 @@ class Firewall_Dynamic extends Engine
             );
         }
         return $rules;
+    }
+
+    /**
+     * Set rule window.
+     *
+     * @param String  rule
+     * @param int     window
+     *
+     * @return void
+     * @throws Engine_Exception, Validation_Exception
+     */
+
+    public function set_window($rule, $window)
+    {
+        Validation_Exception::is_valid($this->validate_window($window));
+
+        $file = new File(self::FOLDER_RULES . $rule . '.xml');
+        if (!$file->exists())
+            throw new Engine_Exception(lang('firewall_dynamic_rule_not_found'), CLEAROS_ERROR);
+        $xml_source = $file->get_contents();
+
+        $xml = simplexml_load_string($xml_source);
+        if ($xml === FALSE)
+            throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
+        $xml->window = $window;
+        $xml->asXML(self::FOLDER_RULES . $rule . '.xml');
+    }
+
+    /**
+     * Set rule group.
+     *
+     * @param String  rule
+     * @param String  group
+     *
+     * @return void
+     * @throws Engine_Exception, Validation_Exception
+     */
+
+    public function set_group($rule, $group)
+    {
+        Validation_Exception::is_valid($this->validate_group($group));
+
+        $file = new File(self::FOLDER_RULES . $rule . '.xml');
+        if (!$file->exists())
+            throw new Engine_Exception(lang('firewall_dynamic_rule_not_found'), CLEAROS_ERROR);
+        $xml_source = $file->get_contents();
+
+        $xml = simplexml_load_string($xml_source);
+        if ($xml === FALSE)
+            throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
+        $xml->group = $group;
+        $xml->asXML(self::FOLDER_RULES . $rule . '.xml');
     }
 
     /**
@@ -258,7 +287,6 @@ class Firewall_Dynamic extends Engine
             }
             $params = "";
             foreach($match->children() as $key => $value) {
-                echo "$key\n";
                 if (empty($value) && !array_key_exists($key, $substitutions))
                     continue;
                 $params .= "--$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
@@ -271,53 +299,42 @@ class Firewall_Dynamic extends Engine
         echo "$cmd\n";
     }
 
-    /**
-     * Loads configuration.
-     *
-     * @return void
-     * @throws Engine_Exception
-     */
-
-    private function _load_config()
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        $configfile = new Configuration_File(self::FILE_CONFIG);
-
-        $this->config = $configfile->load();
-
-        $this->is_loaded = TRUE;
-    }
-
-    /**
-     * Generic set routine.
-     *
-     * @param string $key   key name
-     * @param string $value value for the key
-     *
-     * @return  void
-     * @throws Engine_Exception
-     */
-
-    private function _set_parameter($key, $value)
-    {
-        clearos_profile(__METHOD__, __LINE__);
-
-        try {
-            $file = new File(self::FILE_CONFIG, TRUE);
-            $match = $file->replace_lines("/^$key\s*=\s*/", "$key = $value\n");
-
-            if (!$match)
-                $file->add_lines("$key = $value\n");
-        } catch (Exception $e) {
-            throw new Engine_Exception(clearos_exception_message($e), CLEAROS_ERROR);
-        }
-
-        $this->is_loaded = FALSE;
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // V A L I D A T I O N   M E T H O D S
     ///////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Validation routine for window.
+     *
+     * @param integer $window window time in minutes
+     *
+     * @return mixed void if window is valid, errmsg otherwise
+     */
+
+    function validate_window($window)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        if (!is_numeric($window) || $window <= 0)
+            return lang('firewall_dynamic_window') . ' - ' . lang('base_invalid');
+    }
+
+    /**
+     * Validation routine for a group.
+     *
+     * @param string $group a system group
+     *
+     * @return mixed void if group is valid, errmsg otherwise
+     */
+
+    function validate_group($group)
+    {
+        clearos_profile(__METHOD__, __LINE__);
+
+        $group = Group_Factory::create($group);
+
+        if (! $group->exists())
+            return lang('base_group') . ' - ' . lang('base_invalid');
+    }
 
 }
