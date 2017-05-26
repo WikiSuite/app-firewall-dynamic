@@ -53,8 +53,10 @@ echo form_open('firewall_dynamic/rules/edit/' . $rule);
 echo form_header($metadata['name']);
 
 echo field_dropdown('window', $window_options, $metadata['window'], lang('firewall_dynamic_window'));
-echo field_toggle_enable_disable('root', $metadata['root'], lang('firewall_dynamic_root_account'));
-echo field_dropdown('group', $group_options, $metadata['group'], lang('base_group'));
+if (isset($metadata['root']))
+    echo field_toggle_enable_disable('root', $metadata['root'], lang('firewall_dynamic_root_account'));
+if (isset($metadata['group']))
+    echo field_dropdown('group', $group_options, $metadata['group'], lang('base_group'));
 echo field_button_set($buttons);
 
 echo form_footer();

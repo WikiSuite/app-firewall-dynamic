@@ -67,8 +67,8 @@ foreach ($rules as $id => $rule) {
         $rule['trigger'],
         (array_key_exists($rule['window'], $window_options) ? $window_options[$rule['window']] : $rule['window'] . " " . strtolower(lang('base_seconds'))),
         $rule['description'],
-        ($rule['root'] ? lang('base_yes') : lang('base_no')),
-        $rule['group'],
+        (isset($rule['root']) ? ($rule['root'] ? lang('base_yes') : lang('base_no')) : lang('base_not_applicable')),
+        (isset($rule['group']) ? ($rule['group'] == -1 ? lang('firewall_dynamic_no_group') : $rule['group']) : lang('base_not_applicable')),
     );
     $item['anchors'] = button_set(
         array(

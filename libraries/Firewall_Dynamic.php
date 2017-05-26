@@ -98,6 +98,7 @@ class Firewall_Dynamic extends Engine
 
     const LOG_TAG = 'firewall-dynamic';
     const FOLDER_RULES = '/var/clearos/firewall_dynamic/rules/';
+    const FOLDER_TRIGGERS = '/var/clearos/firewall_dynamic/triggers/';
     const FILE_CONFIG = '/etc/clearos/firewall.d/10-firewall-dynamic';
     const DEFAULT_WINDOW = 30; // Default Window of 30 minutes until timeout
     const CMD_IPTABLES = '/sbin/iptables';
@@ -165,12 +166,14 @@ class Firewall_Dynamic extends Engine
             $rules[$name] = array(
                 'name' => empty($basename) ? (String)$xml->name : lang((String)$xml->name),
                 'description' => empty($basename) ? (String)$xml->description : lang((String)$xml->description),
-                'root' => (int)$xml->root,
-                'enabled' => (int)$xml->enabled,
                 'trigger' => empty($basename) ? (String)$xml->trigger : lang((String)$xml->trigger),
+                'enabled' => (int)$xml->enabled,
                 'window' => (int)$xml->window,
-                'group' => (String)$xml->group,
             );
+            if (isset($xml->root))
+                $rules[$name]['root'] = (int)$xml->root;
+            if (isset($xml->group))
+                $rules[$name]['group'] = (String)$xml->group;
         }
         return $rules;
     }
@@ -548,6 +551,9 @@ class Firewall_Dynamic extends Engine
     function validate_group($group)
     {
         clearos_profile(__METHOD__, __LINE__);
+
+        if ($group == -1)
+            return;
 
         $group = Group_Factory::create($group);
 

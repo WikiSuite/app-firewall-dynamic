@@ -141,7 +141,7 @@ class Rules extends ClearOS_Controller
         //---------------------
          
         $this->form_validation->set_policy('window', 'firewall_dynamic/Firewall_Dynamic', 'validate_window', TRUE);
-        $this->form_validation->set_policy('group', 'firewall_dynamic/Firewall_Dynamic', 'validate_group', TRUE);
+        $this->form_validation->set_policy('group', 'firewall_dynamic/Firewall_Dynamic', 'validate_group', FALSE);
 
         $form_ok = $this->form_validation->run();
 
@@ -174,7 +174,7 @@ class Rules extends ClearOS_Controller
 
         // Groups
         $groups = $this->group_manager->get_details();
-        $group_options[-1] = lang('base_select');
+        $group_options[-1] = lang('firewall_dynamic_no_group');
 
         foreach ($groups as $name => $group) {
             $description = (empty($group['description'])) ? '' : ' - ' . $group['description'];

@@ -13,7 +13,7 @@ $app['license'] = 'GPLv3';
 $app['license_core'] = 'LGPLv3';
 $app['description'] = lang('firewall_dynamic_app_description');
 $app['tooltip'] = array(
-    lang('firewall_dynamic_tooltip_tokens')
+    lang('firewall_dynamic_tooltip_group')
 );
 
 /////////////////////////////////////////////////////////////////////////////
@@ -34,12 +34,12 @@ $app['core_requires'] = array(
 
 $app['core_file_manifest'] = array( 
     'firewall-dynamic.cron' => array(
-        'target' => '/etc/cron.d/firewall-dynamic',
+        'target' => '/etc/cron.d/app-firewall-dynamic',
         'config' => TRUE,
         'config_params' => 'noreplace',
     ),
-    'trigger_ssh.php' => array(
-        'target' => '/var/clearos/firewall_dynamic/triggers/ssh.php',
+    'rule_ssh.php' => array(
+        'target' => '/var/clearos/firewall_dynamic/triggers/webconfig_login/ssh.php',
         'mode' => '0750',
         'owner' => 'webconfig',
         'group' => 'webconfig',
@@ -64,6 +64,11 @@ $app['core_directory_manifest'] = array(
         'group' => 'webconfig',
     ),
     '/var/clearos/firewall_dynamic/triggers' => array(
+        'mode' => '0755',
+        'owner' => 'webconfig',
+        'group' => 'webconfig',
+    ),
+    '/var/clearos/firewall_dynamic/triggers/webconfig_login' => array(
         'mode' => '0755',
         'owner' => 'webconfig',
         'group' => 'webconfig',

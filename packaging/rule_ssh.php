@@ -131,11 +131,13 @@ try {
 
     // Check group membership
     // If not part of ssh group, don't do anything.
-    $group = Group_Factory::create($rule['group']);
-    $group_info = $group->get_info();
+    if ($rule['group'] != -1) {
+        $group = Group_Factory::create($rule['group']);
+        $group_info = $group->get_info();
 
-    if ($username != 'root' && !in_array($username, $group_info['core']['members']))
-        exit(0);
+        if ($username != 'root' && !in_array($username, $group_info['core']['members']))
+            exit(0);
+    }
 
     if ($username == 'root' && !$rule['root'])
         exit(0);

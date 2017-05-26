@@ -2,7 +2,7 @@
 <config name="ssh" basename="firewall_dynamic">
   <name>firewall_dynamic_ssh_name</name>
   <description>firewall_dynamic_ssh_description</description>
-  <trigger>firewall_dynamic_ssh_trigger</trigger>
+  <trigger>firewall_dynamic_trigger_webconfig_login</trigger>
   <window>300</window>
   <enabled>0</enabled>
   <root>0</root>
