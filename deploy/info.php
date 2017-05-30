@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 $app['basename'] = 'firewall_dynamic';
-$app['version'] = '1.0.0';
+$app['version'] = '1.0.1';
 $app['release'] = '1';
 $app['vendor'] = 'WikiSuite';
 $app['packager'] = 'eGloo';
@@ -29,7 +29,8 @@ $app['subcategory'] = lang('base_subcategory_firewall');
 /////////////////////////////////////////////////////////////////////////////
 
 $app['core_requires'] = array(
-//    'firewall-dynamic-extension-core',
+    'clearos-framework >= 7.3.10',
+    //'firewall-dynamic-extension-core',
 );
 
 $app['core_file_manifest'] = array( 
@@ -46,6 +47,18 @@ $app['core_file_manifest'] = array(
     ),
     'ssh.xml' => array(
         'target' => '/var/clearos/firewall_dynamic/rules/ssh.xml',
+        'mode' => '0644',
+        'owner' => 'webconfig',
+        'group' => 'webconfig',
+    ),
+    'rule_openvpn.php' => array(
+        'target' => '/var/clearos/firewall_dynamic/triggers/webconfig_login/openvpn.php',
+        'mode' => '0750',
+        'owner' => 'webconfig',
+        'group' => 'webconfig',
+    ),
+    'openvpn.xml' => array(
+        'target' => '/var/clearos/firewall_dynamic/rules/openvpn.xml',
         'mode' => '0644',
         'owner' => 'webconfig',
         'group' => 'webconfig',

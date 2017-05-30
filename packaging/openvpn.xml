@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config name="ssh" basename="firewall_dynamic">
-  <name>firewall_dynamic_ssh_name</name>
-  <description>firewall_dynamic_ssh_description</description>
+<config name="openvpn" basename="firewall_dynamic">
+  <name>firewall_dynamic_openvpn_name</name>
+  <description>firewall_dynamic_openvpn_description</description>
   <trigger>firewall_dynamic_trigger_webconfig_login</trigger>
   <window>300</window>
   <enabled>0</enabled>
@@ -20,7 +20,28 @@
             <s></s>
           </match>
           <match explicit="tcp">
-            <dport></dport>
+            <dport>1394</dport>
+          </match>
+          <match explicit="state">
+            <state>NEW,ESTABLISHED</state>
+          </match>
+            <match explicit="time">
+            <datestop></datestop>
+          </match>
+        </conditions>
+        <jump>ACCEPT</jump>
+      </rule>
+      <rule>
+        <position>INSERT</position>
+        <conditions>
+          <match>
+            <p>udp</p>
+          </match>
+          <match>
+            <s></s>
+          </match>
+          <match explicit="udp">
+            <dport>1394</dport>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>
@@ -43,7 +64,28 @@
             <s></s>
           </match>
           <match explicit="tcp">
-            <sport></sport>
+            <sport>1394</sport>
+          </match>
+          <match explicit="state">
+            <state>NEW,ESTABLISHED</state>
+          </match>
+            <match explicit="time">
+            <datestop></datestop>
+          </match>
+        </conditions>
+        <jump>ACCEPT</jump>
+      </rule>
+      <rule>
+        <position>INSERT</position>
+        <conditions>
+          <match>
+            <p>udp</p>
+          </match>
+          <match>
+            <s></s>
+          </match>
+          <match explicit="udp">
+            <sport>1394</sport>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>

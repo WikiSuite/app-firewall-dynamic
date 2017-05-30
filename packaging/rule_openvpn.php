@@ -2,7 +2,7 @@
 <?php
 
 /**
- * SSH rule for Firewall Dynamic.
+ * OpenVPN rule for Firewall Dynamic.
  *
  * @category   apps
  * @package    firewall-dynamic
@@ -47,12 +47,10 @@ require_once $bootstrap . '/bootstrap.php';
 use \clearos\apps\firewall_dynamic\Firewall_Dynamic as Firewall_Dynamic;
 use \clearos\apps\groups\Group_Factory as Group_Factory;
 use \clearos\apps\network\Network_Utils as Network_Utils;
-use \clearos\apps\ssh_server\OpenSSH as OpenSSH;
 
 clearos_load_library('firewall_dynamic/Firewall_Dynamic');
 clearos_load_library('groups/Group_Factory');
 clearos_load_library('network/Network_Utils');
-clearos_load_library('ssh_server/OpenSSH');
 
 // Exceptions
 //-----------
@@ -119,19 +117,16 @@ $substitutions = array();
 
 try {
 
-    $ssh = new OpenSSH();
     $substitutions['s'] = $source_ip;
-    $substitutions['dport'] = $ssh->get_port(); 
-    $substitutions['sport'] = $ssh->get_port(); 
     date_default_timezone_set("UTC");
-    $rule = $firewall_dynamic->get_rule('ssh');
+    $rule = $firewall_dynamic->get_rule('openvpn');
 
     // Rule active?
     if (!$rule['enabled'])
         exit(0);
 
     // Check group membership
-    // If not part of ssh group, don't do anything.
+    // If not part of openvpn group, don't do anything.
     if ($rule['group'] != -1) {
         $group = Group_Factory::create($rule['group']);
         $group_info = $group->get_info();
@@ -150,7 +145,7 @@ try {
 
     $datestop = date("Y-m-d\TG:i:s", strtotime("+" . $rule['window'] . " seconds"));
     $substitutions['datestop'] = $datestop;
-    $firewall_dynamic->create_rule('ssh', $substitutions);
+    $firewall_dynamic->create_rule('openvpn', $substitutions);
     exit(0);
 } catch (Exception $e) {
     echo clearos_exception_message($e);

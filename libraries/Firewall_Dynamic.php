@@ -57,6 +57,7 @@ use \clearos\apps\base\Folder as Folder;
 use \clearos\apps\base\Engine as Engine;
 use \clearos\apps\groups\Group_Factory as Group_Factory;
 use \clearos\apps\base\Shell as Shell;
+use \clearos\apps\openvpn\OpenVPN as OpenVPN;
 
 clearos_load_library('base/File');
 clearos_load_library('base/Folder');
@@ -277,8 +278,13 @@ class Firewall_Dynamic extends Engine
         $xml_source = $file->get_contents();
 
         $xml = simplexml_load_string($xml_source);
+
         if ($xml === FALSE)
             throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
+
+        $basename = (String)$xml->attributes()->basename;
+        if ($rule == 'openvpn' && !clearos_load_library('openvpn/OpenVPN'))
+            throw new Engine_Exception(lang('firewall_dynamic_app_not_installed'), CLEAROS_ERROR);
         $xml->enabled = $state;
         $xml->asXML(self::FOLDER_RULES . $rule . '.xml');
     }

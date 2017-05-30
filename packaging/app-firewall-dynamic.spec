@@ -1,7 +1,7 @@
 
 Name: app-firewall-dynamic
 Epoch: 1
-Version: 1.0.0
+Version: 1.0.1
 Release: 1%{dist}
 Summary: Dynamic Firewall
 License: GPLv3
@@ -21,6 +21,7 @@ Summary: Dynamic Firewall - Core
 License: LGPLv3
 Group: ClearOS/Libraries
 Requires: app-base-core
+Requires: clearos-framework >= 7.3.10
 
 %description core
 The dynamic firewall app allows administrator to generate and implement time-based firewall rules based on webconfig events.
