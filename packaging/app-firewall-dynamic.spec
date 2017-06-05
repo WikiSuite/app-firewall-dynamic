@@ -1,7 +1,7 @@
 
 Name: app-firewall-dynamic
 Epoch: 1
-Version: 1.0.1
+Version: 1.0.2
 Release: 1%{dist}
 Summary: Dynamic Firewall
 License: GPLv3
@@ -41,6 +41,8 @@ install -d -m 0755 %{buildroot}/var/clearos/firewall_dynamic/triggers
 install -d -m 0755 %{buildroot}/var/clearos/firewall_dynamic/triggers/webconfig_login
 install -D -m 0755 packaging/10-firewall-dynamic %{buildroot}/etc/clearos/firewall.d/10-firewall-dynamic
 install -D -m 0644 packaging/firewall-dynamic.cron %{buildroot}/etc/cron.d/app-firewall-dynamic
+install -D -m 0644 packaging/openvpn.xml %{buildroot}/var/clearos/firewall_dynamic/rules/openvpn.xml
+install -D -m 0750 packaging/rule_openvpn.php %{buildroot}/var/clearos/firewall_dynamic/triggers/webconfig_login/openvpn.php
 install -D -m 0750 packaging/rule_ssh.php %{buildroot}/var/clearos/firewall_dynamic/triggers/webconfig_login/ssh.php
 install -D -m 0644 packaging/ssh.xml %{buildroot}/var/clearos/firewall_dynamic/rules/ssh.xml
 
@@ -90,5 +92,7 @@ exit 0
 /usr/clearos/apps/firewall_dynamic/libraries
 %config(noreplace) /etc/clearos/firewall.d/10-firewall-dynamic
 %config(noreplace) /etc/cron.d/app-firewall-dynamic
+%attr(0644,webconfig,webconfig) /var/clearos/firewall_dynamic/rules/openvpn.xml
+%attr(0750,webconfig,webconfig) /var/clearos/firewall_dynamic/triggers/webconfig_login/openvpn.php
 %attr(0750,webconfig,webconfig) /var/clearos/firewall_dynamic/triggers/webconfig_login/ssh.php
 %attr(0644,webconfig,webconfig) /var/clearos/firewall_dynamic/rules/ssh.xml
