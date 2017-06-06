@@ -20,7 +20,7 @@
             <s></s>
           </match>
           <match explicit="tcp">
-            <dport>1394</dport>
+            <dport>1194</dport>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>
@@ -41,7 +41,7 @@
             <s></s>
           </match>
           <match explicit="udp">
-            <dport>1394</dport>
+            <dport>1194</dport>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>
@@ -64,7 +64,7 @@
             <s></s>
           </match>
           <match explicit="tcp">
-            <sport>1394</sport>
+            <sport>1194</sport>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>
@@ -85,7 +85,7 @@
             <s></s>
           </match>
           <match explicit="udp">
-            <sport>1394</sport>
+            <sport>1194</sport>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>

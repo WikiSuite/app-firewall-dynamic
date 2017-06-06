@@ -312,50 +312,52 @@ class Firewall_Dynamic extends Engine
         if ($xml === FALSE)
             throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
 
-        $table = $xml->table->attributes()->name;
-        $chain = $xml->table->chain->attributes()->name;
-        $rule = $xml->table->chain->rule;
+        foreach ($xml->table as $table) {
+            foreach ($table->chain as $chain) {
+                foreach ($chain->rule as $rule) {
+                    $args = "-t " . $table->attributes()->name . " ";
+                    if ($xml->position == 'INSERT')
+                        $args .= "-I " . $chain->attributes()->name . " ";
+                    else
+                        $args .= "-A " . $chain->attributes()->name . " ";
+                    foreach ($rule->conditions->match as $match) {
+                        if ($match->attributes()->explicit == null) {
+                            foreach($match->children() as $key => $value) {
+                                $key = (String)$key;
+                                $value = (String)$value;
+                                if (empty($value) && !array_key_exists($key, $substitutions))
+                                    continue;
+                                $args .= "-$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
+                            }
+                            continue;
+                            
+                        }
+                        $params = "";
+                        foreach($match->children() as $key => $value) {
+                            $key = (String)$key;
+                            $value = (String)$value;
+                            if (empty($value) && !array_key_exists($key, $substitutions))
+                                continue;
+                            $params .= "--$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
+                        }
+                        if (!empty($params))
+                            $args .= "-m " . (String)$match->attributes()->explicit . " " . $params;
+                    }
 
-        $args = "-t " . $table . " ";
-        if ($xml->position == 'INSERT')
-            $args .= "-I $chain ";
-        else
-            $args .= "-A $chain ";
-        foreach ($rule->conditions->match as $match) {
-            if ($match->attributes()->explicit == null) {
-                foreach($match->children() as $key => $value) {
-                    $key = (String)$key;
-                    $value = (String)$value;
-                    if (empty($value) && !array_key_exists($key, $substitutions))
-                        continue;
-                    $args .= "-$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
+                    if ($rule->jump != null)
+                        $args .= "-j " . (String)$rule->jump;
+                    try {
+                        $shell = new Shell();
+                        $shell->execute(self::CMD_IPTABLES, " -w " . $args, TRUE);
+                    } catch (Exception $e) {
+                        clearos_log(self::LOG_TAG, "Unable to add rule: " . clearos_exception_message($e) . " - " . $args);
+                        return;
+                    }
+
+                    $this->_add_rule($xml->version, self::CMD_IPTABLES . " -w " .  $args);
                 }
-                continue;
-                
             }
-            $params = "";
-            foreach($match->children() as $key => $value) {
-                $key = (String)$key;
-                $value = (String)$value;
-                if (empty($value) && !array_key_exists($key, $substitutions))
-                    continue;
-                $params .= "--$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
-            }
-            if (!empty($params))
-                $args .= "-m " . (String)$match->attributes()->explicit . " " . $params;
         }
-        if ($xml->table->chain->rule->jump != null)
-            $args .= "-j " . (String)$xml->table->chain->rule->jump;
-
-        try {
-            $shell = new Shell();
-            $shell->execute(self::CMD_IPTABLES, " -w " . $args, TRUE);
-        } catch (Exception $e) {
-            clearos_log(self::LOG_TAG, "Unable to add rule: " . clearos_exception_message($e) . " - " . $args);
-            return;
-        }
-
-        $this->_add_rule($xml->version, self::CMD_IPTABLES . " -w " .  $args);
     }
 
     /**
