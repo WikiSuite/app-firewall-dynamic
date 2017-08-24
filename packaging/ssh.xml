@@ -17,39 +17,16 @@
             <p>tcp</p>
           </match>
           <match>
-            <s></s>
+            <s/>
           </match>
           <match explicit="tcp">
-            <dport></dport>
+            <dport/>
           </match>
           <match explicit="state">
             <state>NEW,ESTABLISHED</state>
           </match>
             <match explicit="time">
-            <datestop></datestop>
-          </match>
-        </conditions>
-        <jump>ACCEPT</jump>
-      </rule>
-    </chain>
-    <chain name="OUTPUT">
-      <rule>
-        <position>INSERT</position>
-        <conditions>
-          <match>
-            <p>tcp</p>
-          </match>
-          <match>
-            <s></s>
-          </match>
-          <match explicit="tcp">
-            <sport></sport>
-          </match>
-          <match explicit="state">
-            <state>NEW,ESTABLISHED</state>
-          </match>
-            <match explicit="time">
-            <datestop></datestop>
+            <datestop/>
           </match>
         </conditions>
         <jump>ACCEPT</jump>

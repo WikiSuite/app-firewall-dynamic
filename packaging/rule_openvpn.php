@@ -94,7 +94,7 @@ $options = getopt($short_options);
 $firewall_dynamic = new Firewall_Dynamic();
 
 $username = isset($options['u']) ? $options['u'] : FALSE;
-$source_ip = isset($options['s']) ? $options['s'] : FALSE;
+$ip = isset($options['s']) ? $options['s'] : FALSE;
 $help = isset($options['h']) ? TRUE : FALSE;
 
 if ($help) {
@@ -108,7 +108,7 @@ if (!$username) {
     exit(1);
 }
 
-if (!$source_ip) {
+if (!$ip) {
     echo "Source IP (-s <ip address>)\n";
     exit(1);
 }
@@ -117,7 +117,8 @@ $substitutions = array();
 
 try {
 
-    $substitutions['s'] = $source_ip;
+    $substitutions['s'] = $ip;
+    $substitutions['d'] = $ip;
     date_default_timezone_set("UTC");
     $rule = $firewall_dynamic->get_rule('openvpn');
 
@@ -138,7 +139,7 @@ try {
     if ($username == 'root' && !$rule['root'])
         exit(0);
 
-    if (! Network_Utils::is_valid_ip($source_ip)) {
+    if (! Network_Utils::is_valid_ip($ip)) {
         echo lang('network_ip_invalid') . "\n";
         exit(1);
     }

@@ -312,11 +312,14 @@ class Firewall_Dynamic extends Engine
         if ($xml === FALSE)
             throw new Engine_Exception(lang('firewall_dynamic_invalid_rule'), CLEAROS_ERROR);
 
-        foreach ($xml->table as $table) {
-            foreach ($table->chain as $chain) {
+        $tables = $xml->table;
+        $chains = $xml->table->chain;
+
+        foreach ($tables as $table) {
+            foreach ($chains as $chain) {
                 foreach ($chain->rule as $rule) {
                     $args = "-t " . $table->attributes()->name . " ";
-                    if ($xml->position == 'INSERT')
+                    if ($rule->position == 'INSERT')
                         $args .= "-I " . $chain->attributes()->name . " ";
                     else
                         $args .= "-A " . $chain->attributes()->name . " ";
@@ -330,7 +333,6 @@ class Firewall_Dynamic extends Engine
                                 $args .= "-$key " . (array_key_exists($key, $substitutions) ? $substitutions[$key] : $value) . " ";
                             }
                             continue;
-                            
                         }
                         $params = "";
                         foreach($match->children() as $key => $value) {
@@ -343,7 +345,6 @@ class Firewall_Dynamic extends Engine
                         if (!empty($params))
                             $args .= "-m " . (String)$match->attributes()->explicit . " " . $params;
                     }
-
                     if ($rule->jump != null)
                         $args .= "-j " . (String)$rule->jump;
                     try {
@@ -353,9 +354,8 @@ class Firewall_Dynamic extends Engine
                         clearos_log(self::LOG_TAG, "Unable to add rule: " . clearos_exception_message($e) . " - " . $args);
                         return;
                     }
-
                     $this->_add_rule($xml->version, self::CMD_IPTABLES . " -w " .  $args);
-                }
+                 }
             }
         }
     }

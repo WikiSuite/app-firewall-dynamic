@@ -17,7 +17,7 @@
             <p>tcp</p>
           </match>
           <match>
-            <s></s>
+            <s/>
           </match>
           <match explicit="tcp">
             <dport>1194</dport>
@@ -26,7 +26,7 @@
             <state>NEW,ESTABLISHED</state>
           </match>
             <match explicit="time">
-            <datestop></datestop>
+            <datestop/>
           </match>
         </conditions>
         <jump>ACCEPT</jump>
@@ -38,16 +38,13 @@
             <p>udp</p>
           </match>
           <match>
-            <s></s>
+            <s/>
           </match>
           <match explicit="udp">
             <dport>1194</dport>
           </match>
-          <match explicit="state">
-            <state>NEW,ESTABLISHED</state>
-          </match>
             <match explicit="time">
-            <datestop></datestop>
+            <datestop/>
           </match>
         </conditions>
         <jump>ACCEPT</jump>
@@ -58,40 +55,16 @@
         <position>INSERT</position>
         <conditions>
           <match>
-            <p>tcp</p>
-          </match>
-          <match>
-            <s></s>
-          </match>
-          <match explicit="tcp">
-            <sport>1194</sport>
-          </match>
-          <match explicit="state">
-            <state>NEW,ESTABLISHED</state>
-          </match>
-            <match explicit="time">
-            <datestop></datestop>
-          </match>
-        </conditions>
-        <jump>ACCEPT</jump>
-      </rule>
-      <rule>
-        <position>INSERT</position>
-        <conditions>
-          <match>
             <p>udp</p>
           </match>
           <match>
-            <s></s>
+            <d/>
           </match>
           <match explicit="udp">
             <sport>1194</sport>
           </match>
-          <match explicit="state">
-            <state>NEW,ESTABLISHED</state>
-          </match>
             <match explicit="time">
-            <datestop></datestop>
+            <datestop/>
           </match>
         </conditions>
         <jump>ACCEPT</jump>

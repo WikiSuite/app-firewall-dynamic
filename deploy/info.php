@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 $app['basename'] = 'firewall_dynamic';
-$app['version'] = '1.0.3';
+$app['version'] = '1.0.4';
 $app['release'] = '1';
 $app['vendor'] = 'WikiSuite';
 $app['packager'] = 'eGloo';
@@ -15,6 +15,13 @@ $app['description'] = lang('firewall_dynamic_app_description');
 $app['tooltip'] = array(
     lang('firewall_dynamic_tooltip_group')
 );
+$app['powered_by'] = array(
+    'vendor' => array(
+        'name' => 'WikiSuite',
+        'url' => 'http://wikisuite.org/',
+    ),
+);
+
 
 /////////////////////////////////////////////////////////////////////////////
 // App name and categories
