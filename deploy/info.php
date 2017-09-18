@@ -5,7 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 $app['basename'] = 'firewall_dynamic';
-$app['version'] = '1.0.4';
+$app['version'] = '1.0.5';
 $app['release'] = '1';
 $app['vendor'] = 'WikiSuite';
 $app['packager'] = 'eGloo';
@@ -57,6 +57,8 @@ $app['core_file_manifest'] = array(
         'mode' => '0644',
         'owner' => 'webconfig',
         'group' => 'webconfig',
+        'config' => TRUE,
+        'config_params' => 'noreplace',
     ),
     'rule_openvpn.php' => array(
         'target' => '/var/clearos/firewall_dynamic/triggers/webconfig_login/openvpn.php',
@@ -69,6 +71,8 @@ $app['core_file_manifest'] = array(
         'mode' => '0644',
         'owner' => 'webconfig',
         'group' => 'webconfig',
+        'config' => TRUE,
+        'config_params' => 'noreplace',
     ),
     '10-firewall-dynamic' => array(
         'target' => '/etc/clearos/firewall.d/10-firewall-dynamic',

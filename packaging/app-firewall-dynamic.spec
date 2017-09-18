@@ -1,7 +1,7 @@
 
 Name: app-firewall-dynamic
 Epoch: 1
-Version: 1.0.4
+Version: 1.0.5
 Release: 1%{dist}
 Summary: Dynamic Firewall
 License: GPLv3
@@ -92,7 +92,7 @@ exit 0
 /usr/clearos/apps/firewall_dynamic/libraries
 %config(noreplace) /etc/clearos/firewall.d/10-firewall-dynamic
 %config(noreplace) /etc/cron.d/app-firewall-dynamic
-%attr(0644,webconfig,webconfig) /var/clearos/firewall_dynamic/rules/openvpn.xml
+%attr(0644,webconfig,webconfig) %config(noreplace) /var/clearos/firewall_dynamic/rules/openvpn.xml
 %attr(0750,webconfig,webconfig) /var/clearos/firewall_dynamic/triggers/webconfig_login/openvpn.php
 %attr(0750,webconfig,webconfig) /var/clearos/firewall_dynamic/triggers/webconfig_login/ssh.php
-%attr(0644,webconfig,webconfig) /var/clearos/firewall_dynamic/rules/ssh.xml
+%attr(0644,webconfig,webconfig) %config(noreplace) /var/clearos/firewall_dynamic/rules/ssh.xml
